@@ -1,0 +1,81 @@
+\documentclass[openany]{book}
+\usepackage{mathptmx}
+\usepackage{ctex}
+
+\usepackage{minted}
+\setminted[python]{bgcolor=orange!5, linenos, breakanywhere=true}
+%定义新的minted命令
+\newminted[pyc]{python}{}
+
+\usepackage{listings}
+
+\usepackage{geometry}
+\geometry{left=2.45cm,right=2.45cm, top=2.77cm, bottom=2.77cm}
+
+\newcommand\tips[1]{\textbf{Tips: } #1}
+\newcommand\notes[1]{\textbf{Notes: } #1}
+\newcommand\warning[1]{\textbf{\textcolor{orange}{#1}}}
+
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=orange!95!black,
+	filecolor=blue,      
+	urlcolor=orange!80!white,
+	citecolor=green,
+}
+
+\title{Python Tricks}
+\author{Stephen CUI\thanks{junocuixuan@163.com}, Ten-Gallon-Head}
+\date{2022 年 12 月 13 日}
+
+\begin{document}
+\maketitle
+\chapter{Python包管理}
+\verb|No modle named linearmodels|，如果linearmodels已经安装，很可能是Jupyter不是默认的python路径。
+\chapter{数据清洗Data Wrangling}
+\section{读入数据}
+\subsection{CSV}
+CSV是以逗号分割的文本文件，CSV中的文字可以采用不同的编码，ANSI，GBK，UTF8，UNICODE等，一定会有一个，可能会有一个默认的，WINDOWS下默认的好像是ANSI，文件另存在确定按钮边上可以选个字符集存储，存储后的文本字符集就是你选的。
+
+\warning{注意：用excel导出有UTF8和直接逗号选择，建议选择直接逗号，因为选UTF8，python默认读入会出现首列乱码。}
+\subsection{memory error}
+扩充虚拟内存的操作解决问题，读的是1.04GB的csv，算损失函数的时候。
+
+建议不解决memory error：因为报错源头在于csv过大了，所以改进读入的值。
+
+dask 库是处理大批量数据的pandas；
+pandas只能在内存上运算；
+dask可以在硬盘加内存上运算；
+\section{缺失值}
+\subsection{缺失值判断}
+判断一个数据框是否有缺失值可以连续使用两次any()函数：
+\begin{pyc}
+df.isnull().any(axis='index').any(axis='index')
+\end{pyc}
+\subsection{缺失值处理}
+\chapter{建模}
+\section{逻辑回归Logistic Regression}
+\begin{enumerate}
+    \item logit回归建模的时候，做数据清洗时，要避免解释变量与被解释变量之间存在共线性，那样会导致后面的回归形成奇异矩阵。
+    \item 在数据清洗时，后面清洗的方法必须依托于前面方法，避免产生由于前后清洗方法不一致导致数据产生偏差。例如：我们第一开始对于数据进行线性内插时，用的forward方法，会留下数据前段的空值，所以后面再次填充时应用bfill而不是fbill。
+    \item logit回归的时候，need covariance of paremeters for computing（unnormalized）covariances
+\end{enumerate}
+\part{pandas}
+\chapter{User Guide}
+\section{Selection by label}
+When using .loc with slices, if both the start and the stop labels are present in the index, then elements located between the two (including them) are returned:
+\begin{pyc}
+s = pd.Series(list('abcde'), index=[0, 3, 2, 5, 4])
+s.loc[3: 5]
+\end{pyc}
+
+If at least one of the two is absent, but the index is sorted, and can be compared against start and stop labels, then slicing will still work as expected, by selecting labels which rank between the two:
+
+\begin{pyc}
+# Obviously 6 is out of the index range, but the data can still be filtered out
+# There may be some problems later
+# from an unexpected bug on December 13, 2022
+s.sort_index().loc[1: 6]
+\end{pyc}
+\end{document}
